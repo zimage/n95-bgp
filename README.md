@@ -211,14 +211,16 @@ We are now ready to start configuring BGP.
 
 The first step is to establish BGP peering sessions between the devices.
 
-We will use the dynamic peering method using IPv4 interface address to establish peering between leafs and clients.
-
 ### Autonomous System (AS) number
 
 For our lab topology:
 - leaf1, client1 and client2 will be part of AS 64500
 - leaf2, client3 and client4 will be part of AS 64600
 - spine1 and spine2 will be part of AS 65500
+
+### BGP peering between Leafs and Clients
+
+We will use the dynamic peering method using IPv4 interface address to establish peering between leafs and clients.
 
 All leaf interfaces towards the clients are configured with IPv4 address as part of startup config.
 
@@ -243,3 +245,152 @@ set / network-instance default protocols bgp dynamic-neighbors accept match 10.8
 set / network-instance default protocols bgp group servers peer-as 64500
 set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
 ```
+
+Dynamic BGP peering configuration on Leaf2 for clients:
+
+```srl
+set / network-instance default protocols bgp autonomous-system 64600
+set / network-instance default protocols bgp router-id 2.2.2.2
+set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
+set / network-instance default protocols bgp dynamic-neighbors accept match 10.90.1.0/24 peer-group servers
+set / network-instance default protocols bgp dynamic-neighbors accept match 10.90.1.0/24 allowed-peer-as [ 64600 ]
+set / network-instance default protocols bgp dynamic-neighbors accept match 172.17.10.0/24 peer-group servers
+set / network-instance default protocols bgp dynamic-neighbors accept match 172.17.10.0/24 allowed-peer-as [ 64600 ]
+set / network-instance default protocols bgp group servers peer-as 64600
+set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
+```
+
+Verify BGP peers are UP.
+
+```srl
+show network-instance default protocols bgp neighbor
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show network-instance default protocols bgp neighbor
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+BGP neighbor summary for network-instance "default"
+Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+|    Net-Inst    |          Peer          |     Group      | Flag | Peer-AS |    State    |   Uptime    |  AFI/SAFI  |     [Rx/Active/Tx]     |
+|                |                        |                |  s   |         |             |             |            |                        |
++================+========================+================+======+=========+=============+=============+============+========================+
+| default        | 10.80.1.1              | servers        | D    | 64500   | established | 0d:1h:34m:9 | ipv4-      | [0/0/1]                |
+|                |                        |                |      |         |             | s           | unicast    |                        |
+| default        | 172.16.10.50           | servers        | D    | 64500   | established | 0d:1h:32m:4 | ipv4-      | [0/0/1]                |
+|                |                        |                |      |         |             | 6s          | unicast    |                        |
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Summary:
+0 configured neighbors, 0 configured sessions are established, 0 disabled peers
+2 dynamic peers
+```
+
+### BGP peering between Leafs and Spines
+
+Between leafs and spines, we will use the IPv6 Link Local Address (LLA) to form dynamic BGP peering sessions.
+
+No manual IP configuration is required. However, the interfaces should be enabled for IPv6 and IPv6 RA (Router Advertisement) should be enabled.
+
+Enabling IPv6 on Leaf1 interfaces to Spine1 and Spine2:
+
+```srl
+set / interface ethernet-1/1 admin-state enable
+set / interface ethernet-1/1 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/1 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set / interface ethernet-1/3 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+```
+
+Enabling IPv6 on Leaf2 interfaces to Spine1 and Spine2:
+
+```srl
+set / interface ethernet-1/2 admin-state enable
+set / interface ethernet-1/2 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/2 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set / interface ethernet-1/3 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+```
+
+Enabling IPv6 on Spine1 interfaces to Leaf1 and Leaf2:
+
+```srl
+set / interface ethernet-1/1 admin-state enable
+set / interface ethernet-1/1 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/1 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set / interface ethernet-1/3 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+```
+
+Enabling IPv6 on Spine2 interfaces to Leaf1 and Leaf2:
+
+```srl
+set / interface ethernet-1/2 admin-state enable
+set / interface ethernet-1/2 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/2 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set / interface ethernet-1/3 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
+set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+```
+
+Verify interface status and check IPv6 Link Local Address (LLA).
+
+```srl
+show interface
+```
+
+Expected output on leaf1 (LLA address may be different on your setup):
+
+
+```srl
+A:admin@leaf1# show interface
+======================================================================================================================================
+ethernet-1/1 is up, speed 25G, type None
+  ethernet-1/1.0 is up
+    Network-instances:
+      * Name: default (default)
+    Encapsulation   : null
+    Type            : routed
+    IPv6 addr    : fe80::1855:4ff:feff:1/64 (link-layer, preferred)
+--------------------------------------------------------------------------------------------------------------------------------------
+ethernet-1/3 is up, speed 25G, type None
+  ethernet-1/3.0 is up
+    Network-instances:
+      * Name: default (default)
+    Encapsulation   : null
+    Type            : routed
+    IPv6 addr    : fe80::1855:4ff:feff:3/64 (link-layer, preferred)
+--------------------------------------------------------------------------------------------------------------------------------------
+```
+
+Next we will configure BGP dynamic peering between leafs and spines.
+
+Dynamic BGP peering configuration on leaf1 towards spines:
+
+```srl
+set / network-instance default protocols bgp group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 peer-group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 allowed-peer-as [ 65500 ]
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 peer-group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 allowed-peer-as [ 65500 ]
+```
+
+
+Dynamic BGP peering configuration on leaf2 towards spines:
+
+```srl
+set / network-instance default protocols bgp group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 peer-group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 allowed-peer-as [ 65500 ]
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 peer-group spines
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 allowed-peer-as [ 65500 ]
+```
+
+
