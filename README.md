@@ -140,16 +140,15 @@ sudo docker exec –it client3 sh
 
 ## Physical link connectivity
 
-When the lab is deployed with the default startup config, all the links are created with IPv4 and IPv6 addresses.
+When the lab is deployed with the default startup config, all the links between leafs and clients are configured by containerlab.
 
 This allows to start configuring bgp right away.
 
 Here's a summary of what is included in the startup config:
 
-- Configure interfaces between Leaf & Spine
 - Configure interface between Leaf & Client
 - Configure system loopback
-- Configure default Network Instance (VRF) and add system loopback and Leaf/Spine interfaces to this VRF
+- Configure default Network Instance (VRF) and add system loopback and Leaf/Client interfaces to this VRF
 - Configure IPs and static routes on Clients
 
 Check the [startup config](n95-bgp/configs/fabric/startup) files to see how these objects are configured in SR Linux.
@@ -164,20 +163,14 @@ show interface
 
 ![image](images/lab-ipv4-2.jpg)
 
-### Verify reachability between devices
+### Verify reachability between leaf and client
 
-After the lab is deployed, check reachability between leaf and spine devices using ping.
+After the lab is deployed, check reachability between leaf and client devices using ping.
 
-Example on spine to Leaf1 using IPv4:
-
-```srl
-ping -c 3 192.168.10.2 network-instance default
-```
-
-Example on spine to Leaf1 using IPv6:
+Example on Leaf1 to Client1:
 
 ```srl
-ping6 -c 3 192:168:10::2 network-instance default
+ping -c 3 172.16.10.50 network-instance default
 ```
 
 ## SR Linux Configuration Mode
@@ -212,3 +205,41 @@ Here's a reference table with some commonly used commands.
 | Access Linux shell | `bash` |
 | Find a command | `tree flat detail \| grep <keyword>` |
 
+## Configure BGP peering
+
+We are now ready to start configuring BGP.
+
+The first step is to establish BGP peering sessions between the devices.
+
+We will use the dynamic peering method using IPv4 interface address to establish peering between leafs and clients.
+
+### Autonomous System (AS) number
+
+For our lab topology:
+- leaf1, client1 and client2 will be part of AS 64500
+- leaf2, client3 and client4 will be part of AS 64600
+- spine1 and spine2 will be part of AS 65500
+
+All leaf interfaces towards the clients are configured with IPv4 address as part of startup config.
+
+Client1 and Client3 are Layer2 and connects to the network using the `irb0` interface on each leaf.
+
+To view Interface status on SR Linux use:
+
+```srl
+show interface
+```
+
+Dynamic BGP peering configuration on Leaf1 for clients:
+
+```srl
+set / network-instance default protocols bgp autonomous-system 64500
+set / network-instance default protocols bgp router-id 1.1.1.1
+set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
+set / network-instance default protocols bgp dynamic-neighbors accept match 172.16.10.0/24 peer-group servers
+set / network-instance default protocols bgp dynamic-neighbors accept match 172.16.10.0/24 allowed-peer-as [ 64500 ]
+set / network-instance default protocols bgp dynamic-neighbors accept match 10.80.1.0/24 peer-group servers
+set / network-instance default protocols bgp dynamic-neighbors accept match 10.80.1.0/24 allowed-peer-as [ 64500 ]
+set / network-instance default protocols bgp group servers peer-as 64500
+set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
+```
