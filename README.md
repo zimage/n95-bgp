@@ -260,7 +260,7 @@ set / network-instance default protocols bgp group servers peer-as 64600
 set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
 ```
 
-Verify BGP peers are UP.
+Verify that BGP peering sessions are 'established' between leafs and clients.
 
 ```srl
 show network-instance default protocols bgp neighbor
@@ -296,48 +296,32 @@ Between leafs and spines, we will use the IPv6 Link Local Address (LLA) to form 
 
 No manual IP configuration is required. However, the interfaces should be enabled for IPv6 and IPv6 RA (Router Advertisement) should be enabled.
 
-Enabling IPv6 on Leaf1 interfaces to Spine1 and Spine2:
+Enabling IPv6 on Leaf1 and Leaf2 interfaces to Spine1 and Spine2:
+(Copy and paste to both leafs)
 
 ```srl
 set / interface ethernet-1/1 admin-state enable
 set / interface ethernet-1/1 subinterface 0 ipv6 admin-state enable
 set / interface ethernet-1/1 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-set / interface ethernet-1/3 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-```
-
-Enabling IPv6 on Leaf2 interfaces to Spine1 and Spine2:
-
-```srl
 set / interface ethernet-1/2 admin-state enable
 set / interface ethernet-1/2 subinterface 0 ipv6 admin-state enable
 set / interface ethernet-1/2 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-set / interface ethernet-1/3 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set /network-instance default interface ethernet-1/1.0
+set /network-instance default interface ethernet-1/2.0
 ```
 
-Enabling IPv6 on Spine1 interfaces to Leaf1 and Leaf2:
+Enabling IPv6 on Spine1 and Spine2 interfaces to Leaf1 and Leaf2:
+(Copy and paste to both spines)
 
 ```srl
 set / interface ethernet-1/1 admin-state enable
 set / interface ethernet-1/1 subinterface 0 ipv6 admin-state enable
 set / interface ethernet-1/1 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-set / interface ethernet-1/3 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-```
-
-Enabling IPv6 on Spine2 interfaces to Leaf1 and Leaf2:
-
-```srl
 set / interface ethernet-1/2 admin-state enable
 set / interface ethernet-1/2 subinterface 0 ipv6 admin-state enable
 set / interface ethernet-1/2 subinterface 0 ipv6 router-advertisement router-role admin-state enable
-set / interface ethernet-1/3 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 admin-state enable
-set / interface ethernet-1/3 subinterface 0 ipv6 router-advertisement router-role admin-state enable
+set /network-instance default interface ethernet-1/1.0
+set /network-instance default interface ethernet-1/2.0
 ```
 
 Verify interface status and check IPv6 Link Local Address (LLA).
@@ -351,46 +335,89 @@ Expected output on leaf1 (LLA address may be different on your setup):
 
 ```srl
 A:admin@leaf1# show interface
-======================================================================================================================================
+=====================================================================================================================================================
 ethernet-1/1 is up, speed 25G, type None
   ethernet-1/1.0 is up
     Network-instances:
-      * Name: default (default)
     Encapsulation   : null
     Type            : routed
-    IPv6 addr    : fe80::1855:4ff:feff:1/64 (link-layer, preferred)
---------------------------------------------------------------------------------------------------------------------------------------
-ethernet-1/3 is up, speed 25G, type None
-  ethernet-1/3.0 is up
+    IPv6 addr    : fe80::1844:4ff:feff:1/64 (link-layer, unknown)
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+ethernet-1/2 is up, speed 25G, type None
+  ethernet-1/2.0 is up
     Network-instances:
-      * Name: default (default)
     Encapsulation   : null
     Type            : routed
-    IPv6 addr    : fe80::1855:4ff:feff:3/64 (link-layer, preferred)
---------------------------------------------------------------------------------------------------------------------------------------
+    IPv6 addr    : fe80::1844:4ff:feff:2/64 (link-layer, unknown)
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
 Next we will configure BGP dynamic peering between leafs and spines.
 
-Dynamic BGP peering configuration on leaf1 towards spines:
+Dynamic BGP peering configuration on leaf1 and leaf2 towards spines:
+(Copy and paste to both leafs)
 
 ```srl
 set / network-instance default protocols bgp group spines
 set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 peer-group spines
 set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 allowed-peer-as [ 65500 ]
-set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 peer-group spines
-set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 allowed-peer-as [ 65500 ]
-```
-
-
-Dynamic BGP peering configuration on leaf2 towards spines:
-
-```srl
-set / network-instance default protocols bgp group spines
 set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 peer-group spines
 set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 allowed-peer-as [ 65500 ]
-set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 peer-group spines
-set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/3.0 allowed-peer-as [ 65500 ]
 ```
 
 
+Dynamic BGP peering configuration on spine1 towards leafs:
+
+```srl
+set / network-instance default protocols bgp autonomous-system 65500
+set / network-instance default protocols bgp router-id 10.10.10.10
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 peer-group leafs
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 allowed-peer-as [ 64500 64600 ]
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 peer-group leafs
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 allowed-peer-as [ 64500 64600 ]
+set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
+set / network-instance default protocols bgp group leafs
+```
+
+Dynamic BGP peering configuration on spine2 towards leafs:
+
+```srl
+set / network-instance default protocols bgp autonomous-system 65500
+set / network-instance default protocols bgp router-id 20.20.20.20
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 peer-group leafs
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/1.0 allowed-peer-as [ 64500 64600 ]
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 peer-group leafs
+set / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/2.0 allowed-peer-as [ 64500 64600 ]
+set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
+set / network-instance default protocols bgp group leafs
+```
+
+Verify that BGP peering sessions are 'established' between leafs and spines.
+
+```srl
+show network-instance default protocols bgp neighbor
+```
+
+Expected output on spine1:
+
+```srl
+A:admin@spine1# show network-instance default protocols bgp neighbor
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+BGP neighbor summary for network-instance "default"
+Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+|    Net-Inst    |          Peer          |     Group      | Flag | Peer-AS |    State    |   Uptime    |  AFI/SAFI  |     [Rx/Active/Tx]     |
+|                |                        |                |  s   |         |             |             |            |                        |
++================+========================+================+======+=========+=============+=============+============+========================+
+| default        | fe80::1844:4ff:feff:1% | leafs          | D    | 64500   | established | 0d:0h:2m:34 | ipv4-      | [0/0/0]                |
+|                | ethernet-1/1.0         |                |      |         |             | s           | unicast    |                        |
+| default        | fe80::18c3:5ff:feff:2% | leafs          | D    | 64600   | established | 0d:0h:2m:35 | ipv4-      | [0/0/0]                |
+|                | ethernet-1/2.0         |                |      |         |             | s           | unicast    |                        |
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Summary:
+0 configured neighbors, 0 configured sessions are established, 0 disabled peers
+2 dynamic peers
+```
