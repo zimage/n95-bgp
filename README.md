@@ -421,3 +421,65 @@ Summary:
 0 configured neighbors, 0 configured sessions are established, 0 disabled peers
 2 dynamic peers
 ```
+
+## Enabling BFD on leaf-spine links
+
+Bi-directional Forwarding (BFD) can be enabled on leaf-spine links for faster failure detection.
+
+BFD configuration on leafs towards spines:
+(Copy and paste to both leafs)
+
+```srl
+set / bfd subinterface ethernet-1/1.0 admin-state enable
+set / bfd subinterface ethernet-1/1.0 desired-minimum-transmit-interval 100000
+set / bfd subinterface ethernet-1/1.0 required-minimum-receive 100000
+set / bfd subinterface ethernet-1/2.0 admin-state enable
+set / bfd subinterface ethernet-1/2.0 desired-minimum-transmit-interval 100000
+set / bfd subinterface ethernet-1/2.0 required-minimum-receive 100000
+insert / network-instance default protocols bgp group spines failure-detection enable-bfd true
+insert / network-instance default protocols bgp group spines failure-detection fast-failover true
+```
+
+BFD configuration on spines:
+(Copy and paste to both spines)
+
+```srl
+set / bfd subinterface ethernet-1/1.0 admin-state enable
+set / bfd subinterface ethernet-1/1.0 desired-minimum-transmit-interval 100000
+set / bfd subinterface ethernet-1/1.0 required-minimum-receive 100000
+set / bfd subinterface ethernet-1/2.0 admin-state enable
+set / bfd subinterface ethernet-1/2.0 desired-minimum-transmit-interval 100000
+set / bfd subinterface ethernet-1/2.0 required-minimum-receive 100000
+insert / network-instance default protocols bgp group leafs failure-detection enable-bfd true
+insert / network-instance default protocols bgp group leafs failure-detection fast-failover true
+```
+
+Verify BFD sessions are established. The BGP neighbor output now shows the `B` flag.
+
+```srl
+show network-instance default protocols bgp neighbor
+```
+
+Expected output on spine1:
+
+```srl
+A:admin@spine1# show network-instance default protocols bgp neighbor
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+BGP neighbor summary for network-instance "default"
+Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+|    Net-Inst    |          Peer          |     Group      | Flag | Peer-AS |    State    |   Uptime    |  AFI/SAFI  |     [Rx/Active/Tx]     |
+|                |                        |                |  s   |         |             |             |            |                        |
++================+========================+================+======+=========+=============+=============+============+========================+
+| default        | fe80::1844:4ff:feff:1% | leafs          | DB   | 64500   | established | 0d:1h:11m:1 | ipv4-      | [0/0/0]                |
+|                | ethernet-1/1.0         |                |      |         |             | 3s          | unicast    |                        |
+| default        | fe80::18c3:5ff:feff:2% | leafs          | DB   | 64600   | established | 0d:1h:11m:1 | ipv4-      | [0/0/0]                |
+|                | ethernet-1/2.0         |                |      |         |             | 4s          | unicast    |                        |
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Summary:
+0 configured neighbors, 0 configured sessions are established, 0 disabled peers
+2 dynamic peers
+```
