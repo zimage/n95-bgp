@@ -53,7 +53,7 @@ Each workshop participant will be provided with the below topology consisting of
 
 All leafs and Spines will be running the latest Nokia [SR Linux](https://www.nokia.com/networks/ip-networks/service-router-linux-NOS/) release 25.7.2.
 
-All 4 clients will be running [Alpine Linux](https://alpinelinux.org/)
+All 4 clients will be running [goBGP](https://github.com/osrg/gobgp)
 
 ## Deploying the lab
 
