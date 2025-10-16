@@ -87,31 +87,34 @@ sudo clab deploy -t srl-bgp.clab.yml
 [Containerlab](https://containerlab.dev/) will deploy the lab and display a table with the list of nodes and their IPs.
 
 ```bash
-14:29:46 INFO Adding host entries path=/etc/hosts
-14:29:46 INFO Adding SSH config for nodes path=/etc/ssh/ssh_config.d/clab-srl-evpn.conf
+22:53:50 INFO Adding host entries path=/etc/hosts
+22:53:50 INFO Adding SSH config for nodes path=/etc/ssh/ssh_config.d/clab-bgp.conf
 ╭─────────┬──────────────────────────────┬─────────┬────────────────────╮
 │   Name  │          Kind/Image          │  State  │   IPv4/6 Address   │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ client1 │ linux                        │ running │ 172.20.20.10       │
-│         │ ghcr.io/srl-labs/alpine      │         │ 2001:172:20:20::10 │
+│ client1 │ linux                        │ running │ 172.20.30.10       │
+│         │ osrg/gobgp                   │         │ 2001:172:20:30::10 │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ client2 │ linux                        │ running │ 172.20.20.11       │
-│         │ ghcr.io/srl-labs/alpine      │         │ 2001:172:20:20::11 │
+│ client2 │ linux                        │ running │ 172.20.30.11       │
+│         │ osrg/gobgp                   │         │ 2001:172:20:30::11 │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ client3 │ linux                        │ running │ 172.20.20.12       │
-│         │ ghcr.io/srl-labs/alpine      │         │ 2001:172:20:20::12 │
+│ client3 │ linux                        │ running │ 172.20.30.12       │
+│         │ osrg/gobgp                   │         │ 2001:172:20:30::12 │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ client4 │ linux                        │ running │ 172.20.20.13       │
-│         │ ghcr.io/srl-labs/alpine      │         │ 2001:172:20:20::13 │
+│ client4 │ linux                        │ running │ 172.20.30.13       │
+│         │ osrg/gobgp                   │         │ 2001:172:20:30::13 │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ leaf1   │ nokia_srlinux                │ running │ 172.20.20.2        │
-│         │ ghcr.io/nokia/srlinux:25.3.2 │         │ 2001:172:20:20::2  │
+│ leaf1   │ nokia_srlinux                │ running │ 172.20.30.5        │
+│         │ ghcr.io/nokia/srlinux:25.7.1 │         │ 2001:172:20:30::5  │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ leaf2   │ nokia_srlinux                │ running │ 172.20.20.4        │
-│         │ ghcr.io/nokia/srlinux:25.3.2 │         │ 2001:172:20:20::4  │
+│ leaf2   │ nokia_srlinux                │ running │ 172.20.30.2        │
+│         │ ghcr.io/nokia/srlinux:25.7.1 │         │ 2001:172:20:30::2  │
 ├─────────┼──────────────────────────────┼─────────┼────────────────────┤
-│ spine   │ nokia_srlinux                │ running │ 172.20.20.3        │
-│         │ ghcr.io/nokia/srlinux:25.3.2 │         │ 2001:172:20:20::3  │
+│ spine1  │ nokia_srlinux                │ running │ 172.20.30.3        │
+│         │ ghcr.io/nokia/srlinux:25.7.1 │         │ 2001:172:20:30::3  │
+├─────────┼──────────────────────────────┼─────────┼────────────────────┤
+│ spine2  │ nokia_srlinux                │ running │ 172.20.30.4        │
+│         │ ghcr.io/nokia/srlinux:25.7.1 │         │ 2001:172:20:30::4  │
 ╰─────────┴──────────────────────────────┴─────────┴────────────────────╯
 ```
 
