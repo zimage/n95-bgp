@@ -490,7 +490,49 @@ Summary:
 
 ## Configuring Route Policies
 
-The previous `neighbor` output, you will notice in the last column that there are no routes received or transmitted between leaf and spines.
+In the previous `neighbor` output, you will notice in the last column that there are no routes received or transmitted between leaf and spines.
+
+If we check the routing table, on any of the 4 switches, we will only see local routes now.
+
+Check routing table on leaf1:
+
+```srl
+show network-instance default route-table ipv4-unicast summary
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show network-instance default route-table ipv4-unicast summary
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+IPv4 unicast route table of network instance default
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++-----------------+------+-----------+--------------------+---------+---------+--------+-----------+----------+----------+----------+----------+
+|     Prefix      |  ID  |   Route   |    Route Owner     | Active  | Origin  | Metric |   Pref    | Next-hop | Next-hop |  Backup  |  Backup  |
+|                 |      |   Type    |                    |         | Network |        |           |  (Type)  | Interfac | Next-hop | Next-hop |
+|                 |      |           |                    |         | Instanc |        |           |          |    e     |  (Type)  | Interfac |
+|                 |      |           |                    |         |    e    |        |           |          |          |          |    e     |
++=================+======+===========+====================+=========+=========+========+===========+==========+==========+==========+==========+
+| 1.1.1.1/32      | 7    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 10.80.1.0/24    | 3    | local     | net_inst_mgr       | True    | default | 0      | 0         | 10.80.1. | ethernet |          |          |
+|                 |      |           |                    |         |         |        |           | 254      | -1/11.0  |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 10.80.1.254/32  | 3    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 10.80.1.255/32  | 3    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 172.16.10.0/24  | 4    | local     | net_inst_mgr       | True    | default | 0      | 0         | 172.16.1 | irb0.0   |          |          |
+|                 |      |           |                    |         |         |        |           | 0.254    |          |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 172.16.10.254/3 | 4    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 2               |      |           |                    |         |         |        |           |          |          |          |          |
+| 172.16.10.255/3 | 4    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 2               |      |           |                    |         |         |        |           |          |          |          |          |
++-----------------+------+-----------+--------------------+---------+---------+--------+-----------+----------+----------+----------+----------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+IPv4 routes total                    : 7
+IPv4 prefixes with active routes     : 7
+IPv4 prefixes with active ECMP routes: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+```
 
 Now that BGP peering sessions are UP, we are ready to start advertising routes to BGP neighbors.
 
