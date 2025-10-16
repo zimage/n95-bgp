@@ -978,6 +978,7 @@ Spine will reject this route because it sees it's own AS `65500` in the AS path.
 This can be verified using the route detail command on the spine.
 
 ```srl
+show network-instance default protocols bgp routes ipv4 prefix 2.2.2.2/32 detail
 ```
 
 Expected output on spine2:
