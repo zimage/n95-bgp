@@ -678,6 +678,60 @@ Origin codes: i=IGP, e=EGP, ?=incomplete
 
 We will check the details of these routes in a later section.
 
+The routing table should now display the remote system IPs.
+
+Check routing table on leaf1:
+
+```srl
+show network-instance default route-table ipv4-unicast summary
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show network-instance default route-table ipv4-unicast summary
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+IPv4 unicast route table of network instance default
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++-----------------+------+-----------+--------------------+---------+---------+--------+-----------+----------+----------+----------+----------+
+|     Prefix      |  ID  |   Route   |    Route Owner     | Active  | Origin  | Metric |   Pref    | Next-hop | Next-hop |  Backup  |  Backup  |
+|                 |      |   Type    |                    |         | Network |        |           |  (Type)  | Interfac | Next-hop | Next-hop |
+|                 |      |           |                    |         | Instanc |        |           |          |    e     |  (Type)  | Interfac |
+|                 |      |           |                    |         |    e    |        |           |          |          |          |    e     |
++=================+======+===========+====================+=========+=========+========+===========+==========+==========+==========+==========+
+| 1.1.1.1/32      | 7    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 2.2.2.2/32      | 0    | bgp       | bgp_mgr            | True    | default | 0      | 170       | fe80::18 | ethernet |          |          |
+|                 |      |           |                    |         |         |        |           | da:6ff:f | -1/1.0   |          |          |
+|                 |      |           |                    |         |         |        |           | eff:1    |          |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 10.10.10.10/32  | 0    | bgp       | bgp_mgr            | True    | default | 0      | 170       | fe80::18 | ethernet |          |          |
+|                 |      |           |                    |         |         |        |           | da:6ff:f | -1/1.0   |          |          |
+|                 |      |           |                    |         |         |        |           | eff:1    |          |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 10.80.1.0/24    | 3    | local     | net_inst_mgr       | True    | default | 0      | 0         | 10.80.1. | ethernet |          |          |
+|                 |      |           |                    |         |         |        |           | 254      | -1/11.0  |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 10.80.1.254/32  | 3    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 10.80.1.255/32  | 3    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 20.20.20.20/32  | 0    | bgp       | bgp_mgr            | True    | default | 0      | 170       | fe80::18 | ethernet |          |          |
+|                 |      |           |                    |         |         |        |           | 42:7ff:f | -1/2.0   |          |          |
+|                 |      |           |                    |         |         |        |           | eff:2    |          |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 172.16.10.0/24  | 4    | local     | net_inst_mgr       | True    | default | 0      | 0         | 172.16.1 | irb0.0   |          |          |
+|                 |      |           |                    |         |         |        |           | 0.254    |          |          |          |
+|                 |      |           |                    |         |         |        |           | (direct) |          |          |          |
+| 172.16.10.254/3 | 4    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 2               |      |           |                    |         |         |        |           |          |          |          |          |
+| 172.16.10.255/3 | 4    | host      | net_inst_mgr       | True    | default | 0      | 0         | None     | None     |          |          |
+| 2               |      |           |                    |         |         |        |           |          |          |          |          |
++-----------------+------+-----------+--------------------+---------+---------+--------+-----------+----------+----------+----------+----------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+IPv4 routes total                    : 10
+IPv4 prefixes with active routes     : 10
+IPv4 prefixes with active ECMP routes: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+```
+
 Now that all system IPs are advertised among all leafs and spines, we should be able to ping the system IPs.
 
 Ping `leaf2` system IP from `leaf1`:
