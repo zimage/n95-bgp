@@ -513,6 +513,8 @@ set / routing-policy policy export-system statement one match protocol local
 set / routing-policy policy export-system statement one match prefix prefix-set system
 set / routing-policy policy export-system statement one action policy-result accept
 set / network-instance default protocols bgp group spines export-policy [ export-system ]
+set / network-instance default protocols bgp ebgp-default-policy import-reject-all false
+set / network-instance default protocols bgp ebgp-default-policy export-reject-all false
 ```
 
 Route policy on spines:
@@ -524,6 +526,8 @@ set / routing-policy policy export-system statement one match protocol local
 set / routing-policy policy export-system statement one match prefix prefix-set system
 set / routing-policy policy export-system statement one action policy-result accept
 set / network-instance default protocols bgp group leafs export-policy [ export-system ]
+set / network-instance default protocols bgp ebgp-default-policy import-reject-all false
+set / network-instance default protocols bgp ebgp-default-policy export-reject-all false
 ```
 
 Verify that both leafs and spines are now advertising and receiving routes.
