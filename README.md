@@ -1509,6 +1509,12 @@ Origin codes: i=IGP, e=EGP, ?=incomplete
 
 We see that both routes received from spine1 are not `Best Used` and we also see the local preference value of 10 assigned to these routes.
 
+Delete import policy before proceeding to the next step to return to status quo with ECMP.
+
+```srl
+delete /network-instance default protocols bgp afi-safi ipv4-unicast import-policy
+```
+
 ## EVPN Overlay
 
 So far we have only been advertising IPv4 address family in BGP.
