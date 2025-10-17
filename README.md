@@ -1,4 +1,4 @@
-# Welcome to the BGP for DC Workshop at NANOG 95
+<img width="253" height="148" alt="image" src="https://github.com/user-attachments/assets/a0e997d7-ee76-403c-be83-48fa4e84f7f6" /># Welcome to the BGP for DC Workshop at NANOG 95
 
 This README is your starting point into the hands on section.
 
@@ -1594,10 +1594,167 @@ No routes are advertised between the EVPN peers due to missing EVPN instances on
 
 We will create a Layer 3 EVPN to connect client2 and client 4.
 
+The interfaces on leafs facing the layer 3 clients are pre-configured as part of the startup config.
+
+The interface status can be verified using the following command.
+
+```srl
+show interface ethernet-1/11
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show interface ethernet-1/11
+=====================================================================
+ethernet-1/11 is up, speed 25G, type None
+  ethernet-1/11.0 is up
+    Network-instances:
+      * Name: default (default)
+    Encapsulation   : null
+    Type            : routed
+    IPv4 addr    : 10.80.1.254/24 (static, preferred, primary)
+---------------------------------------------------------------------
+=====================================================================
+```
+
+VXLAN tunnel configuration on leaf1 and leaf2:
+(Copy and paste to both leafs)
+
+```srl
+set / tunnel-interface vxlan24 vxlan-interface 200 type routed
+set / tunnel-interface vxlan24 vxlan-interface 200 ingress vni 200
+```
+
 Layer 3 EVPN configuration on leaf1:
 
 ```srl
+set / network-instance evpn-1 type ip-vrf
+set / network-instance evpn-1 interface ethernet-1/11.0
+set / network-instance evpn-1 vxlan-interface vxlan24.200
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 encapsulation-type vxlan
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan24.200
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 evi 200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-distinguisher rd 1.1.1.1:200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:64500:200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:64500:200
+```
 
+Layer 3 EVPN configuration on leaf2:
+
+```srl
+set / network-instance evpn-1 type ip-vrf
+set / network-instance evpn-1 interface ethernet-1/11.0
+set / network-instance evpn-1 vxlan-interface vxlan24.200
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 encapsulation-type vxlan
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan24.200
+set / network-instance evpn-1 protocols bgp-evpn bgp-instance 1 evi 200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-distinguisher rd 2.2.2.2:200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:64500:200
+set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:64500:200
+```
+
+BGP will now start advertisting EVPN routes with the peers.
+
+Verify BGP neighbor status and confirm EVPN routes are being advertised and received.
+
+```srl
+show network-instance default protocols bgp neighbor
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show network-instance default protocols bgp neighbor
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+BGP neighbor summary for network-instance "default"
+Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+|    Net-Inst    |          Peer          |     Group      | Flag | Peer-AS |    State    |   Uptime    |  AFI/SAFI  |     [Rx/Active/Tx]     |
+|                |                        |                |  s   |         |             |             |            |                        |
++================+========================+================+======+=========+=============+=============+============+========================+
+| default        | 2.2.2.2                | evpn-peers     | S    | 64600   | established | 0d:4h:22m:2 | evpn       | [1/1/1]                |
+|                |                        |                |      |         |             | s           |            |                        |
+| default        | 172.16.10.50           | servers        | D    | 64500   | established | 0d:6h:52m:4 | ipv4-      | [0/0/4]                |
+|                |                        |                |      |         |             | 8s          | unicast    |                        |
+| default        | fe80::183b:6ff:feff:1% | spines         | DB   | 65500   | established | 0d:8h:15m:5 | ipv4-      | [2/2/3]                |
+|                | ethernet-1/1.0         |                |      |         |             | 7s          | unicast    |                        |
+| default        | fe80::18f3:7ff:feff:2% | spines         | DB   | 65500   | established | 0d:8h:12m:5 | ipv4-      | [3/3/4]                |
+|                | ethernet-1/2.0         |                |      |         |             | 6s          | unicast    |                        |
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Summary:
+1 configured neighbors, 1 configured sessions are established, 0 disabled peers
+3 dynamic peers
+```
+
+Verify the EVPN route types being advertised.
+
+```srl
+show network-instance default protocols bgp routes evpn route-type summary
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# show network-instance default protocols bgp routes evpn route-type summary
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Show report for the BGP route table of network-instance "default"
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Status codes: u=used, *=valid, >=best, x=stale, b=backup, w=unused-weight-only
+Origin codes: i=IGP, e=EGP, ?=incomplete
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+BGP Router ID: 1.1.1.1      AS: 64500      Local AS: 64500
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Type 5 IP Prefix Routes
++--------+------------------+------------+---------------------+------------------+--------+------------------+------------------+------------------+
+| Status |      Route-      |   Tag-ID   |     IP-address      |     neighbor     | Path-  |     Next-Hop     |      Label       |     Gateway      |
+|        |  distinguisher   |            |                     |                  |   id   |                  |                  |                  |
++========+==================+============+=====================+==================+========+==================+==================+==================+
+| u*>    | 2.2.2.2:200      | 0          | 10.90.1.0/24        | 2.2.2.2          | 0      | 2.2.2.2          | 200              | 0.0.0.0          |
++--------+------------------+------------+---------------------+------------------+--------+------------------+------------------+------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+0 Ethernet Auto-Discovery routes 0 used, 0 valid, 0 stale
+0 MAC-IP Advertisement routes 0 used, 0 valid, 0 stale
+0 Inclusive Multicast Ethernet Tag routes 0 used, 0 valid, 0 stale
+0 Ethernet Segment routes 0 used, 0 valid, 0 stale
+1 IP Prefix routes 1 used, 1 valid, 0 stale
+0 Selective Multicast Ethernet Tag routes 0 used, 0 valid, 0 stale
+0 Selective Multicast Membership Report Sync routes 0 used, 0 valid, 0 stale
+0 Selective Multicast Leave Sync routes 0 used, 0 valid, 0 stale
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+```
+
+We can see EVPN Route Type 5 (IP Prefix) is being advertised.
+
+Now that the client prefixes are know to each leaf, we can try to ping between client2 and client4 over this EVPN overlay.
+
+Login to client2:
+
+```bash
+docker exec -it client2 bash
+```
+
+Ping client4 IP:
+
+```bash
+ping -c 3 10.90.1.1
+```
+
+Expected output:
+
+```bash
+root@client2:~# ping -c 3 10.90.1.1
+PING 10.90.1.1 (10.90.1.1) 56(84) bytes of data.
+64 bytes from 10.90.1.1: icmp_seq=1 ttl=253 time=6.36 ms
+64 bytes from 10.90.1.1: icmp_seq=2 ttl=253 time=1.68 ms
+64 bytes from 10.90.1.1: icmp_seq=3 ttl=253 time=1.45 ms
+
+--- 10.90.1.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 1.457/3.170/6.365/2.261 ms
 ```
 
 ## BGP Debugging
