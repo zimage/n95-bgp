@@ -1,4 +1,4 @@
-<img width="253" height="148" alt="image" src="https://github.com/user-attachments/assets/a0e997d7-ee76-403c-be83-48fa4e84f7f6" /># Welcome to the BGP for DC Workshop at NANOG 95
+# Welcome to the BGP for DC Workshop at NANOG 95
 
 This README is your starting point into the hands on section.
 
