@@ -1456,7 +1456,7 @@ When the leafs receive routes with this community value, it should take appropri
 
 In the previous route detail output from leaf1, we see that spine1 route is still `Best Used`.
 
-An import policy can be defined on leafs that will set the local preference to 10 whenever a route is received with the community value `65535:0`. All other routes will have a local preference of 100.
+An import policy can be defined on leafs that will set the local preference to 0 whenever a route is received with the community value `65535:0`. All other routes will have a local preference of 100.
 
 Import policy configuration on leaf1 and leaf2:
 (Copy and paste to both leafs)
@@ -1466,7 +1466,7 @@ set / routing-policy community-set GSHUT member [ 65535:0 ]
 set / routing-policy policy import-GSHUT statement two action bgp local-preference set 100
 set / routing-policy policy import-GSHUT statement one match protocol bgp
 set / routing-policy policy import-GSHUT statement one match bgp community-set GSHUT
-set / routing-policy policy import-GSHUT statement one action bgp local-preference set 10
+set / routing-policy policy import-GSHUT statement one action bgp local-preference set 0
 set / network-instance default protocols bgp afi-safi ipv4-unicast import-policy [ import-GSHUT ]
 ```
 
@@ -1493,11 +1493,11 @@ Origin codes: i=IGP, e=EGP, ?=incomplete
 +---------------------------------------------------------------------------------------------------------------+
 |   Status        Network       Path-id      Next Hop         MED         LocPref       AsPath        Origin    |
 +===============================================================================================================+
-|      *        2.2.2.2/32    0             fe80::18f2:        -            10        [65500,            i      |
+|      *        2.2.2.2/32    0             fe80::18f2:        -            0         [65500,            i      |
 |                                           6ff:feff:1%                               64600]                    |
 |                                           ethernet-                                                           |
 |                                           1/1.0                                                               |
-|      *        172.17.10.0   0             fe80::18f2:        -            10        [65500,            i      |
+|      *        172.17.10.0   0             fe80::18f2:        -            0         [65500,            i      |
 |               /24                         6ff:feff:1%                               64600]                    |
 |                                           ethernet-                                                           |
 |                                           1/1.0                                                               |
