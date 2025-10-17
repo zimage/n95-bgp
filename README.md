@@ -11,7 +11,12 @@ Shortcut links to major sections in this README:
 |   |   |
 |---|---|
 | [Lab Topology](#lab-topology) | [Deploying the lab](#deploying-the-lab) |
-| [CLI Quick Reference](#sr-linux-configuration-mode) |
+| [IPv4 Addressing(#ipv4-link-addressing)] | [CLI Quick Reference](#sr-linux-configuration-mode) |
+| [BGP Peering(#configure-bgp-peering)] | [Enabling BFD](#enabling-bfd-on-leaf-spine-links) |
+| [Route Policies](#configuring-route-policies) | [ECMP](#enabling-ecmp) |
+| [AS Path](#bgp-attribute---as-path) | [IP Fabric](#ip-fabric-with-no-overlay) |
+| [Community](#bgp-attribute---community) | [Local Preference](#bgp-attribute---local-preference) |
+| [EVPN Overlay](#evpn-overlay) | [Debugging](#bgp-debugging)
 
 ## Lab Environment
 
