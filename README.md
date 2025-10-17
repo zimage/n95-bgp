@@ -1535,7 +1535,9 @@ set / network-instance default protocols bgp group evpn-peers multihop admin-sta
 set / network-instance default protocols bgp group evpn-peers multihop maximum-hops 5
 set / network-instance default protocols bgp group evpn-peers afi-safi evpn admin-state enable
 set / network-instance default protocols bgp group evpn-peers transport local-address 1.1.1.1
+set / network-instance default protocols bgp group evpn-peers afi-safi ipv4-unicast admin-state disable
 set / network-instance default protocols bgp neighbor 2.2.2.2 peer-group evpn-peers
+
 ```
 
 Peering configuration on leaf2:
@@ -1546,6 +1548,7 @@ set / network-instance default protocols bgp group evpn-peers multihop admin-sta
 set / network-instance default protocols bgp group evpn-peers multihop maximum-hops 5
 set / network-instance default protocols bgp group evpn-peers afi-safi evpn admin-state enable
 set / network-instance default protocols bgp group evpn-peers transport local-address 2.2.2.2
+set / network-instance default protocols bgp group evpn-peers afi-safi ipv4-unicast admin-state disable
 set / network-instance default protocols bgp neighbor 1.1.1.1 peer-group evpn-peers
 ```
 
@@ -1559,32 +1562,27 @@ Expected output on leaf1:
 
 ```srl
 A:admin@leaf1# show network-instance default protocols bgp neighbor
--------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 BGP neighbor summary for network-instance "default"
 Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
--------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------
-+-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
-| Net-Inst  |   Peer    |   Group   |   Flags   |  Peer-AS  |   State   |  Uptime   | AFI/SAFI  | [Rx/Activ |
-|           |           |           |           |           |           |           |           |   e/Tx]   |
-+===========+===========+===========+===========+===========+===========+===========+===========+===========+
-| default   | 2.2.2.2   | evpn-     | S         | 64600     | establish | 0d:0h:3m: | evpn      | [0/0/0]   |
-|           |           | peers     |           |           | ed        | 41s       | ipv4-     | [3/0/3]   |
-|           |           |           |           |           |           |           | unicast   |           |
-| default   | 10.80.1.1 | servers   | D         | 64500     | establish | 0d:3h:50m | ipv4-     | [0/0/4]   |
-|           |           |           |           |           | ed        | :20s      | unicast   |           |
-| default   | 172.16.10 | servers   | D         | 64500     | establish | 0d:5h:37m | ipv4-     | [0/0/4]   |
-|           | .50       |           |           |           | ed        | :35s      | unicast   |           |
-| default   | fe80::184 | spines    | DB        | 65500     | establish | 0d:5h:31m | ipv4-     | [3/3/2]   |
-|           | 7:7ff:fef |           |           |           | ed        | :46s      | unicast   |           |
-|           | f:2%ether |           |           |           |           |           |           |           |
-|           | net-1/2.0 |           |           |           |           |           |           |           |
-| default   | fe80::18f | spines    | DB        | 65500     | establish | 0d:5h:31m | ipv4-     | [2/0/5]   |
-|           | 2:6ff:fef |           |           |           | ed        | :32s      | unicast   |           |
-|           | f:1%ether |           |           |           |           |           |           |           |
-|           | net-1/1.0 |           |           |           |           |           |           |           |
-+-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
--------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+|    Net-Inst    |          Peer          |     Group      | Flag | Peer-AS |    State    |   Uptime    |  AFI/SAFI  |     [Rx/Active/Tx]     |
+|                |                        |                |  s   |         |             |             |            |                        |
++================+========================+================+======+=========+=============+=============+============+========================+
+| default        | 2.2.2.2                | evpn-peers     | S    | 64600   | established | 0d:0h:0m:20 | evpn       | [0/0/0]                |
+|                |                        |                |      |         |             | s           |            |                        |
+| default        | 10.80.1.1              | servers        | D    | 64500   | established | 0d:3h:54m:1 | ipv4-      | [0/0/4]                |
+|                |                        |                |      |         |             | 8s          | unicast    |                        |
+| default        | 172.16.10.50           | servers        | D    | 64500   | established | 0d:2h:31m:6 | ipv4-      | [0/0/4]                |
+|                |                        |                |      |         |             | s           | unicast    |                        |
+| default        | fe80::183b:6ff:feff:1% | spines         | DB   | 65500   | established | 0d:3h:54m:1 | ipv4-      | [2/2/3]                |
+|                | ethernet-1/1.0         |                |      |         |             | 5s          | unicast    |                        |
+| default        | fe80::18f3:7ff:feff:2% | spines         | DB   | 65500   | established | 0d:3h:51m:1 | ipv4-      | [3/3/4]                |
+|                | ethernet-1/2.0         |                |      |         |             | 4s          | unicast    |                        |
++----------------+------------------------+----------------+------+---------+-------------+-------------+------------+------------------------+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 Summary:
 1 configured neighbors, 1 configured sessions are established, 0 disabled peers
 4 dynamic peers
