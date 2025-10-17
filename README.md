@@ -52,7 +52,7 @@ The objective of the hands on section of this workshop is the following:
 
 Each workshop participant will be provided with the below topology consisting of 2 leaf and 2 spine nodes along with 4 clients.
 
-![image](images/lab-topology.jpg)
+![image](lab-topology.png)
 
 ## NOS (Network Operating System)
 
@@ -170,7 +170,7 @@ show interface
 
 ### IPv4 Link Addressing
 
-![image](images/lab-ipv4-2.jpg)
+![image](ipv4-address.png)
 
 ### Verify reachability between leaf and client
 
