@@ -1763,3 +1763,207 @@ rtt min/avg/max/mdev = 1.457/3.170/6.365/2.261 ms
 ```
 
 ## BGP Debugging
+
+A general step by step procedure for troubleshooting BGP issues is provided below.
+
+- Check BGP neighbor status
+
+```srl
+show network-instance default protocols bgp neighbor
+```
+
+If neighbor status is down, check reachability to neighbor using ping.
+
+If needed, take packet capture (explained later) to check BGP message details.
+
+- Check advertised routes
+
+```srl
+show network-instance default protocols bgp neighbor 2.2.2.2 advertised-rout
+es ipv4
+```
+
+- Check received routes
+
+```srl
+show network-instance default protocols bgp neighbor 2.2.2.2 received-routes
+ ipv4
+```
+
+- Check route details
+
+```srl
+show network-instance default protocols bgp routes ipv4 prefix 172.16.10.0/2
+4 detail
+```
+
+If expected routes are not being advertised or received or if they do not have the intended route attributes (like community, local-pref), check route policy configuration.
+
+### Traffic monitor
+
+Traffic monitor tool can be used to capture traffic on the switch.
+
+For our workshop, we are interested in seeing BGP messages which are destined for TCP port 179.
+
+The tool captures packets post any interface ACL processing.
+
+To start traffic monitor:
+
+```srl
+tools system traffic-monitor protocol tcp source-port 179 verbose
+```
+
+Since BGP sessions are already established and route updates are provided, we are likely going to see only KEEPALIVE messages.
+
+In order to see BGP session establishment and route update messages in the packet capture, we recommend bouncing BGP on `spine1` while the packet capture is in progress.
+
+On spine1:
+
+```srl
+set /network-instance default protocols bgp admin-state disable
+commit stay
+set /network-instance default protocols bgp admin-state enable
+commit stay
+```
+
+Sample output on leaf1:
+
+```bash
+Border Gateway Protocol - UPDATE Message
+    Marker: ffffffffffffffffffffffffffffffff
+    Length: 77
+    Type: UPDATE Message (2)
+    Withdrawn Routes Length: 0
+    Total Path Attribute Length: 54
+    Path attributes
+        Path Attribute - MP_REACH_NLRI
+            Flags: 0x90, Optional, Extended-Length, Non-transitive, Complete
+                1... .... = Optional: Set
+                .0.. .... = Transitive: Not set
+                ..0. .... = Partial: Not set
+                ...1 .... = Extended-Length: Set
+                .... 0000 = Unused: 0x0
+            Type Code: MP_REACH_NLRI (14)
+            Length: 26
+            Address family identifier (AFI): IPv4 (1)
+            Subsequent address family identifier (SAFI): Unicast (1)
+            Next hop: fe80::183b:6ff:feff:1
+                IPv6 Address: fe80::183b:6ff:feff:1
+            Number of Subnetwork points of attachment (SNPA): 0
+            Network Layer Reachability Information (NLRI)
+                2.2.2.2/32
+                    MP Reach NLRI prefix length: 32
+                    MP Reach NLRI IPv4 prefix: 2.2.2.2
+        Path Attribute - ORIGIN: IGP
+            Flags: 0x40, Transitive, Well-known, Complete
+                0... .... = Optional: Not set
+                .1.. .... = Transitive: Set
+                ..0. .... = Partial: Not set
+                ...0 .... = Extended-Length: Not set
+                .... 0000 = Unused: 0x0
+            Type Code: ORIGIN (1)
+            Length: 1
+            Origin: IGP (0)
+        Path Attribute - AS_PATH: 65500 64600 
+            Flags: 0x40, Transitive, Well-known, Complete
+                0... .... = Optional: Not set
+                .1.. .... = Transitive: Set
+                ..0. .... = Partial: Not set
+                ...0 .... = Extended-Length: Not set
+                .... 0000 = Unused: 0x0
+            Type Code: AS_PATH (2)
+            Length: 10
+            AS Path segment: 65500 64600
+                Segment type: AS_SEQUENCE (2)
+                Segment length (number of ASN): 2
+                AS4: 65500
+                AS4: 64600
+        Path Attribute - COMMUNITIES: GRACEFUL_SHUTDOWN 
+            Flags: 0xc0, Optional, Transitive, Complete
+                1... .... = Optional: Set
+                .1.. .... = Transitive: Set
+                ..0. .... = Partial: Not set
+                ...0 .... = Extended-Length: Not set
+                .... 0000 = Unused: 0x0
+            Type Code: COMMUNITIES (8)
+            Length: 4
+            Communities: GRACEFUL_SHUTDOWN 
+                Community Well-known: GRACEFUL_SHUTDOWN (0xffff0000)
+```
+
+Stop the traffic monitor using CTRL+c
+
+To monitor and write the captured BGP packets to a file, use:
+
+```srl
+tools system traffic-monitor protocol tcp source-port 179 output-file bgp-monitor.pcap
+```
+
+Restart BGP on spine1 as described previouly.
+
+After waiting for a couple of minutes, stop the traffic monitor using CTRL+c.
+
+Expected output of traffic-monitor with output file on leaf1:
+
+```srl
+A:admin@leaf1# tools system traffic-monitor protocol tcp destination-port 179 output-file bgp-monitor.pcap
+/system:
+    Saved current running configuration as initial (startup) configuration '/etc/opt/srlinux/config.json'
+
+Capturing on 'monit'
+ ** (tshark:90108) 15:29:43.017001 [Main MESSAGE] -- Capture started.
+ ** (tshark:90108) 15:29:43.017023 [Main MESSAGE] -- File: "bgp-monitor.pcap"
+^CStopping the capture and clearing the capture filter configuration
+/system:
+    Saved current running configuration as initial (startup) configuration '/etc/opt/srlinux/config.json'
+
+Command execution aborted : 'tools system traffic-monitor protocol tcp destination-port 179 output-file bgp-monitor.pcap'
+```
+
+The packet capture file is stored under the user home directory.
+
+```srl
+bash ls -lrt
+```
+
+Expected output on leaf1:
+
+```srl
+A:admin@leaf1# bash ls -lrt
+total 12
+-rw-r--r-- 1 admin ntwkuser 8852 Oct 28 15:33 bgp-monitor.pcap
+```
+
+Switch to the linux shell using the `bash` command.
+
+Run the below command to remove the overhead information from the packet capture.
+
+```bash
+editcap -C 0:48 /home/admin/bgp-monitor.pcap /home/admin/edit-bgp.pcap
+```
+
+Transfer the edited file to your laptop and open it in wireshark to see BGP messages.
+
+On your VM:
+
+```bash
+scp leaf1:~/edit-bgp.pcap /home/nokiauser
+```
+
+Use a UI based file transfer tool like Filezilla or WinSCP to transfer the capture file to your laptop.
+
+## End of workshop
+
+This is the end of this workshop.
+
+## Useful links
+
+* [containerlab](https://containerlab.dev/)
+* [gNMIc](https://gnmic.openconfig.net/)
+
+### SR Linux
+* [SR Linux documentation](https://documentation.nokia.com/srlinux/)
+* [Learn SR Linux](https://learn.srlinux.dev/)
+* [YANG Browser](https://yang.srlinux.dev/)
+* [gNxI Browser](https://gnxi.srlinux.dev/)
+* [Ansible Collection](https://learn.srlinux.dev/ansible/collection/)
