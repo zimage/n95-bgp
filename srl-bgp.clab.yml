@@ -1,0 +1,87 @@
+name: bgp
+
+mgmt:
+  network: bgp-lab-mgmt
+  ipv4-subnet: 172.20.30.0/24
+  ipv6-subnet: 2001:172:20:30::/64
+
+prefix: ""
+topology:
+  defaults:
+    kind: nokia_srlinux
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:25.7.1
+    linux:
+      image: osrg/gobgp
+      binds:
+        - n95-bgp/gobgpd.sh:/tmp/gobgpd.sh
+  nodes:
+    leaf1:
+      startup-config: ./n95-configs/leaf1-startup.cfg
+      mgmt-ipv4: 172.20.30.5
+      mgmt-ipv6: 2001:172:20:30::5
+    leaf2:
+      startup-config: ./n95-configs/leaf2-startup.cfg
+      mgmt-ipv4: 172.20.30.2
+      mgmt-ipv6: 2001:172:20:30::2
+    spine1:
+      startup-config: ./n95-configs/spine1-startup.cfg
+      mgmt-ipv4: 172.20.30.3
+      mgmt-ipv6: 2001:172:20:30::3
+    spine2:
+      startup-config: ./n95-configs/spine2-startup.cfg
+      mgmt-ipv4: 172.20.30.4
+      mgmt-ipv6: 2001:172:20:30::4
+    client1:
+      kind: linux
+      mgmt-ipv4: 172.20.30.10
+      mgmt-ipv6: 2001:172:20:30::10
+      binds:
+        - n95-bgp/client1-gobgpd.yml:/etc/gobgpd.yml
+      exec:
+        - ip address add 172.16.10.50/24 dev eth1
+        - ip route add 172.0.0.0/8 via 172.16.10.254
+        - bash /tmp/gobgpd.sh
+    client2:
+      kind: linux
+      mgmt-ipv4: 172.20.30.11
+      mgmt-ipv6: 2001:172:20:30::11
+      binds:
+        - n95-bgp/client2-gobgpd.yml:/etc/gobgpd.yml
+      exec:
+        - ip address add 10.80.1.1/24 dev eth1
+        - ip route add 10.0.0.0/8 via 10.80.1.254
+        - bash /tmp/gobgpd.sh
+    client3:
+      kind: linux
+      mgmt-ipv4: 172.20.30.12
+      mgmt-ipv6: 2001:172:20:30::12
+      binds:
+        - n95-bgp/client3-gobgpd.yml:/etc/gobgpd.yml
+      exec:
+        - ip address add 172.17.10.60/24 dev eth1
+        - ip route add 172.0.0.0/8 via 172.17.10.254
+        - bash /tmp/gobgpd.sh
+    client4:
+      kind: linux
+      mgmt-ipv4: 172.20.30.13
+      mgmt-ipv6: 2001:172:20:30::13
+      binds:
+        - n95-bgp/client4-gobgpd.yml:/etc/gobgpd.yml
+      exec:
+        - ip address add 10.90.1.1/24 dev eth1
+        - ip route add 10.0.0.0/8 via 10.90.1.254
+        - bash /tmp/gobgpd.sh
+  links:
+      # spine-leaf links
+    - endpoints: ["leaf1:e1-1", "spine1:e1-1"]
+    - endpoints: ["leaf2:e1-1", "spine2:e1-1"]
+    - endpoints: ["leaf1:e1-2", "spine2:e1-2"]
+    - endpoints: ["leaf2:e1-2", "spine1:e1-2"]
+    
+      # leaf-client links
+    - endpoints: ["client1:eth1","leaf1:e1-10"]
+    - endpoints: ["client2:eth1","leaf1:e1-11"]
+    - endpoints: ["client3:eth1","leaf2:e1-10"]
+    - endpoints: ["client4:eth1","leaf2:e1-11"]
