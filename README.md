@@ -214,7 +214,7 @@ Here's a reference table with some commonly used commands.
 | Access Linux shell | `bash` |
 | Find a command | `tree flat detail \| grep <keyword>` |
 
-## Configure BGP peering
+## 1 Configure BGP peering
 
 We are now ready to start configuring BGP.
 
@@ -227,7 +227,7 @@ For our lab topology:
 - leaf2, client3 and client4 will be part of AS 64600
 - spine1 and spine2 will be part of AS 65500
 
-### BGP peering between Leafs and Clients
+### 1.1 BGP peering between Leafs and Clients
 
 We will use the dynamic peering method using IPv4 interface address to establish peering between leafs and clients.
 
@@ -299,7 +299,7 @@ Summary:
 2 dynamic peers
 ```
 
-### BGP peering between Leafs and Spines
+### 1.2 BGP peering between Leafs and Spines
 
 Between leafs and spines, we will use the IPv6 Link Local Address (LLA) to form dynamic BGP peering sessions.
 
@@ -431,7 +431,7 @@ Summary:
 2 dynamic peers
 ```
 
-## Enabling BFD on leaf-spine links
+## 2 Enabling BFD on leaf-spine links
 
 Bi-directional Forwarding (BFD) can be enabled on leaf-spine links for faster failure detection.
 
@@ -493,7 +493,7 @@ Summary:
 2 dynamic peers
 ```
 
-## Configuring Route Policies
+## 3 Configuring Route Policies
 
 In the previous `neighbor` output, you will notice in the last column that there are no routes received or transmitted between leaf and spines.
 
@@ -545,7 +545,7 @@ We will start by advertising the system loopback IPs to each other.
 
 This is achieved using a route policy applied as an `export` to BGP.
 
-### Route policy configuration
+### 3.1 Route policy configuration
 
 First we will create a prefix-list to match any `/32` IP that is originated locally.
 
@@ -760,7 +760,7 @@ PING 2.2.2.2 (2.2.2.2) 56(84) bytes of data.
 rtt min/avg/max/mdev = 2.962/3.468/3.791/0.362 ms
 ```
 
-## Enabling ECMP
+## 4 Enabling ECMP
 
 At this stage, `leaf1` is receiving `leaf2`'s system IP from both spines. But it is only installing the route from one spine. The other route is discarded and not installed in the forwarding table.
 
@@ -908,7 +908,7 @@ IPv4 unicast route table of network instance default
 
 We can see that the routing table now has 2 next-hops for `2.2.2.2/32`.
 
-## BGP Attribute - AS Path
+## 5 BGP Attribute - AS Path
 
 Verify the route details of `leaf2` system IP received on `leaf1`:
 
@@ -1011,7 +1011,7 @@ Received Paths: 2
 
 The `Invalid Reason` parameter in the above output indicates there is an AS loop due to which the route is rejected.
 
-### Modifying AS path
+### 5.1 Modifying AS path
 
 AS path can be modified using route policies.
 
@@ -1087,7 +1087,7 @@ Remove the export policy from spine1:
 delete network-instance default protocols bgp group leafs export-policy [add-as]
 ```
 
-## IP Fabric with no Overlay
+## 6 IP Fabric with no Overlay
 
 Our end goal is to establish connectivity between the clients.
 
@@ -1222,7 +1222,7 @@ PING 172.17.10.60 (172.17.10.60) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.363/0.532/0.757/0.167 ms
 ```
 
-## BGP Attribute - Community
+## 7 BGP Attribute - Community
 
 BGP communities are labels that can be attached to routes when they are advertised.
 
@@ -1392,7 +1392,7 @@ Unknown Attr    : None
 
 We see that the route was received from the spines with the community and it is being re-advertised to the clients with the same community value.
 
-### Graceful Shutdown Community
+### 7.1 Graceful Shutdown Community
 
 We will use the standard Graceful Shutdown community to drain traffic from spine1.
 
@@ -1447,7 +1447,7 @@ Received Paths: 2
 
 We can see that the route received from spine1 includes the `65535:0` in addition to the community added by leaf2.
 
-## BGP Attribute - Local Preference
+## 8 BGP Attribute - Local Preference
 
 Local preference is like assigning a weight to a route.
 
@@ -1520,7 +1520,7 @@ Delete import policy before proceeding to the next step to return to status quo 
 delete /network-instance default protocols bgp afi-safi ipv4-unicast import-policy
 ```
 
-## EVPN Overlay
+## 9 EVPN Overlay
 
 So far we have only been advertising IPv4 address family in BGP.
 
@@ -1528,7 +1528,7 @@ In this section, we will enable the advertisement of the `evpn` address family s
 
 We will establish connectivity between client2 and client4 using this EVPN overlay.
 
-### Multihop BGP peering
+### 9.1 Multihop BGP peering
 
 We will create a multihop BGP peering session between leaf1 and leaf2 using their system IPs which are already advertised in our network. This peering session will only be used for advertising `evpn` address family.
 
@@ -1595,7 +1595,7 @@ Summary:
 
 No routes are advertised between the EVPN peers due to missing EVPN instances on the leafs.
 
-### Layer 3 EVPN
+### 9.2 Layer 3 EVPN
 
 We will create a Layer 3 EVPN to connect client2 and client 4.
 
@@ -1762,7 +1762,7 @@ PING 10.90.1.1 (10.90.1.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 1.457/3.170/6.365/2.261 ms
 ```
 
-## BGP Debugging
+## 10 BGP Debugging
 
 A general step by step procedure for troubleshooting BGP issues is provided below.
 
@@ -1799,7 +1799,7 @@ show network-instance default protocols bgp routes ipv4 prefix 172.16.10.0/2
 
 If expected routes are not being advertised or received or if they do not have the intended route attributes (like community, local-pref), check route policy configuration.
 
-### Traffic monitor
+### 10.1 Traffic monitor
 
 Traffic monitor tool can be used to capture traffic on the switch.
 
