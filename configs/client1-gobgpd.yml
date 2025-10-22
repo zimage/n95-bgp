@@ -1,0 +1,8 @@
+global:
+    config:
+        as: 64500     
+        router-id: 192.10.1.1
+neighbors:
+    - config:
+        neighbor-address: 172.16.10.254
+        peer-as: 64500
