@@ -1,0 +1,8 @@
+global:
+    config:
+        as: 64600     
+        router-id: 192.10.1.4
+neighbors:
+    - config:
+        neighbor-address: 10.90.1.254
+        peer-as: 64600
