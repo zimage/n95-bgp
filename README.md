@@ -241,7 +241,7 @@ To view Interface status on SR Linux use:
 show interface
 ```
 
-Dynamic BGP peering configuration on Leaf1 for clients:
+Dynamic BGP peering configuration on **Leaf1** for clients:
 
 ```srl
 set / network-instance default protocols bgp autonomous-system 64500
@@ -255,7 +255,7 @@ set / network-instance default protocols bgp group servers peer-as 64500
 set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
 ```
 
-Dynamic BGP peering configuration on Leaf2 for clients:
+Dynamic BGP peering configuration on **Leaf2** for clients:
 
 ```srl
 set / network-instance default protocols bgp autonomous-system 64600
@@ -305,7 +305,7 @@ Between leafs and spines, we will use the IPv6 Link Local Address (LLA) to form 
 
 No manual IP configuration is required. However, the interfaces should be enabled for IPv6 and IPv6 RA (Router Advertisement) should be enabled.
 
-Enabling IPv6 on Leaf1 and Leaf2 interfaces to Spine1 and Spine2:
+Enabling IPv6 on **Leaf1** and **Leaf2** interfaces to Spine1 and Spine2:
 (Copy and paste to both leafs)
 
 ```srl
@@ -319,7 +319,7 @@ set /network-instance default interface ethernet-1/1.0
 set /network-instance default interface ethernet-1/2.0
 ```
 
-Enabling IPv6 on Spine1 and Spine2 interfaces to Leaf1 and Leaf2:
+Enabling IPv6 on **Spine1** and **Spine2** interfaces to Leaf1 and Leaf2:
 (Copy and paste to both spines)
 
 ```srl
@@ -363,7 +363,7 @@ ethernet-1/2 is up, speed 25G, type None
 
 Next we will configure BGP dynamic peering between leafs and spines.
 
-Dynamic BGP peering configuration on leaf1 and leaf2 towards spines:
+Dynamic BGP peering configuration on **leaf1** and **leaf2** towards spines:
 (Copy and paste to both leafs)
 
 ```srl
@@ -375,7 +375,7 @@ set / network-instance default protocols bgp dynamic-neighbors interface etherne
 ```
 
 
-Dynamic BGP peering configuration on spine1 towards leafs:
+Dynamic BGP peering configuration on **spine1** towards leafs:
 
 ```srl
 set / network-instance default protocols bgp autonomous-system 65500
@@ -388,7 +388,7 @@ set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state e
 set / network-instance default protocols bgp group leafs
 ```
 
-Dynamic BGP peering configuration on spine2 towards leafs:
+Dynamic BGP peering configuration on **spine2** towards leafs:
 
 ```srl
 set / network-instance default protocols bgp autonomous-system 65500
@@ -436,7 +436,7 @@ Summary:
 Bi-directional Forwarding (BFD) can be enabled on leaf-spine links for faster failure detection.
 
 BFD configuration on leafs towards spines:
-(Copy and paste to both leafs)
+(Copy and paste to **both leafs**)
 
 ```srl
 set / bfd subinterface ethernet-1/1.0 admin-state enable
@@ -450,7 +450,7 @@ insert / network-instance default protocols bgp group spines failure-detection f
 ```
 
 BFD configuration on spines:
-(Copy and paste to both spines)
+(Copy and paste to **both spines**)
 
 ```srl
 set / bfd subinterface ethernet-1/1.0 admin-state enable
@@ -552,7 +552,7 @@ First we will create a prefix-list to match any `/32` IP that is originated loca
 We will then match on that prefix-list and accept the route to be exported.
 
 Route policy on leafs:
-(Copy and paste to both leafs)
+(Copy and paste to **both leafs**)
 
 ```srl
 set / routing-policy prefix-set system prefix 0.0.0.0/0 mask-length-range 32..32
@@ -565,7 +565,7 @@ set / network-instance default protocols bgp ebgp-default-policy export-reject-a
 ```
 
 Route policy on spines:
-(Copy and paste to both spines)
+(Copy and paste to **both spines**)
 
 ```srl
 set / routing-policy prefix-set system prefix 0.0.0.0/0 mask-length-range 32..32
@@ -830,7 +830,7 @@ IPv4 unicast route table of network instance default
 The 2nd route is not installed because ECMP is not enabled on `leaf1`. ECMP allows for mutiple paths to be installed in the forwarding table for a prefix.
 
 Let's enable ECMP on both leafs.
-(Copy and paste to both leafs)
+(Copy and paste to **both leafs**)
 
 ```srl
 set / network-instance default protocols bgp afi-safi ipv4-unicast multipath allow-multiple-as true
@@ -1021,7 +1021,7 @@ Let's apply an export policy on spine1 that will increase the AS path length whe
 
 As a result, leaf1 should prefer spine2 routes over spine1. ECMP will no longer apply as BGP route selection finds a best route.
 
-Configure the following policy on spine1:
+Configure the following policy on **spine1**:
 
 ```srl
 set / routing-policy as-path-set leaf2-as as-path-set-member [ .* 64600 ]
@@ -1095,7 +1095,7 @@ In this section, we will learn how to connect the clients using an IP only fabri
 
 We are ready to advertise `client1`'s routes on leaf1 and `client3`'s routes on leaf2 to each other. The communication will be happening over the spine.
 
-Create route policy on leaf1:
+Create route policy on **leaf1**:
 
 ```srl
 set / routing-policy prefix-set client prefix 172.16.10.0/24 mask-length-range 24..32
@@ -1105,7 +1105,7 @@ set / routing-policy policy export-client statement one action policy-result acc
 set / network-instance default protocols bgp group spines export-policy [ export-system export-client ]
 ```
 
-Create route policy on leaf2:
+Create route policy on **leaf2**:
 
 ```srl
 set / routing-policy prefix-set client prefix 172.17.10.0/24 mask-length-range 24..32
@@ -1275,14 +1275,14 @@ Next, let's use a policy on leaf1 to add a community when advertising this route
 
 We will modify the existing policy that was used to advertise the client route.
 
-Policy to add community on leaf1:
+Policy to add community on **leaf1**:
 
 ```srl
 set / routing-policy community-set client1 member [ 64500:100 ]
 set / routing-policy policy export-client statement one action bgp communities add client1
 ```
 
-Policy to add community on leaf2:
+Policy to add community on **leaf2**:
 
 ```srl
 set / routing-policy community-set client1 member [ 64600:200 ]
@@ -1396,7 +1396,7 @@ We see that the route was received from the spines with the community and it is 
 
 We will use the standard Graceful Shutdown community to drain traffic from spine1.
 
-Configure policy on spine1 to advertise this community value.
+Configure policy on **spine1** to advertise this community value.
 
 ```srl
 set / routing-policy community-set GSHUT member [ 65535:0 ]
@@ -1463,7 +1463,7 @@ In the previous route detail output from leaf1, we see that spine1 route is stil
 
 An import policy can be defined on leafs that will set the local preference to 0 whenever a route is received with the community value `65535:0`. All other routes will have a local preference of 100.
 
-Import policy configuration on leaf1 and leaf2:
+Import policy configuration on **leaf1 and leaf2**:
 (Copy and paste to both leafs)
 
 ```srl
@@ -1532,7 +1532,7 @@ We will establish connectivity between client2 and client4 using this EVPN overl
 
 We will create a multihop BGP peering session between leaf1 and leaf2 using their system IPs which are already advertised in our network. This peering session will only be used for advertising `evpn` address family.
 
-Peering configuration on leaf1:
+Peering configuration on **leaf1**:
 
 ```srl
 set / network-instance default protocols bgp group evpn-peers peer-as 64600
@@ -1545,7 +1545,7 @@ set / network-instance default protocols bgp neighbor 2.2.2.2 peer-group evpn-pe
 
 ```
 
-Peering configuration on leaf2:
+Peering configuration on **leaf2**:
 
 ```srl
 set / network-instance default protocols bgp group evpn-peers peer-as 64500
@@ -1623,7 +1623,7 @@ ethernet-1/11 is up, speed 25G, type None
 =====================================================================
 ```
 
-VXLAN tunnel configuration on leaf1 and leaf2:
+VXLAN tunnel configuration on **leaf1 and leaf2**:
 (Copy and paste to both leafs)
 
 ```srl
@@ -1631,7 +1631,7 @@ set / tunnel-interface vxlan24 vxlan-interface 200 type routed
 set / tunnel-interface vxlan24 vxlan-interface 200 ingress vni 200
 ```
 
-Layer 3 EVPN configuration on leaf1:
+Layer 3 EVPN configuration on **leaf1**:
 
 ```srl
 set / network-instance evpn-1 type ip-vrf
@@ -1645,7 +1645,7 @@ set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target expo
 set / network-instance evpn-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:64500:200
 ```
 
-Layer 3 EVPN configuration on leaf2:
+Layer 3 EVPN configuration on **leaf2**:
 
 ```srl
 set / network-instance evpn-1 type ip-vrf
@@ -1817,7 +1817,7 @@ Since BGP sessions are already established and route updates are provided, we ar
 
 In order to see BGP session establishment and route update messages in the packet capture, we recommend bouncing BGP on `spine1` while the packet capture is in progress.
 
-On spine1:
+On **spine1**:
 
 ```srl
 set /network-instance default protocols bgp admin-state disable
