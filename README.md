@@ -214,6 +214,19 @@ Here's a reference table with some commonly used commands.
 | Access Linux shell | `bash` |
 | Find a command | `tree flat detail \| grep <keyword>` |
 
+### Command alias
+
+To save some typing, we added an alias `cs` for `commit stay` in the startup configs.
+
+The next time you want to do a commit, just type in `cs`.
+
+If you would like to create more aliases, use the below commands. Replace the `<alias>` with the alias you want to use and `<command>` with the actual command.
+
+```srl
+environment alias <alias> <command>
+environment save home
+```
+
 ## 1 Configure BGP peering
 
 We are now ready to start configuring BGP.
@@ -254,6 +267,8 @@ set / network-instance default protocols bgp dynamic-neighbors accept match 10.8
 set / network-instance default protocols bgp group servers peer-as 64500
 set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
 ```
+
+Try using `cs` alias to do a commit.
 
 Dynamic BGP peering configuration on **Leaf2** for clients:
 
