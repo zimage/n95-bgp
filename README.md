@@ -82,6 +82,18 @@ Verify that the git repo files are available on your VM.
 ls -lrt n95-bgp
 ```
 
+Expected output on VM:
+
+```bash
+$ ls -lrt n95-bgp
+total 608
+-rw-r--r--  1 sabdulra sabdulra 105232 Oct 23 16:15 README.md
+drwxr-xr-x  1 sabdulra sabdulra    302 Oct 23 16:15 configs
+-rw-r--r--  1 sabdulra sabdulra 291379 Oct 23 16:15 ipv4-address.png
+-rw-r--r--  1 sabdulra sabdulra   2495 Oct 23 16:15 srl-bgp.clab.yml
+-rw-r--r--  1 sabdulra sabdulra 216409 Oct 23 16:15 lab-topology.png
+```
+
 To deploy the lab, run the following:
 
 ```bash
