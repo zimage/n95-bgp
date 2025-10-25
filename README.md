@@ -1536,7 +1536,9 @@ Origin codes: i=IGP, e=EGP, ?=incomplete
 
 We see that both routes received from spine1 are not `Best Used` and we also see the local preference value of 10 assigned to these routes.
 
-Delete import policy before proceeding to the next step to return to status quo with ECMP.
+Delete import policy from leaf1 before proceeding to the next step to return to status quo with ECMP.
+
+On leaf1:
 
 ```srl
 delete /network-instance default protocols bgp afi-safi ipv4-unicast import-policy
@@ -1801,22 +1803,19 @@ If needed, take packet capture (explained later) to check BGP message details.
 - Check advertised routes
 
 ```srl
-show network-instance default protocols bgp neighbor 2.2.2.2 advertised-rout
-es ipv4
+show network-instance default protocols bgp neighbor 2.2.2.2 advertised-routes ipv4
 ```
 
 - Check received routes
 
 ```srl
-show network-instance default protocols bgp neighbor 2.2.2.2 received-routes
- ipv4
+show network-instance default protocols bgp neighbor 2.2.2.2 received-routes ipv4
 ```
 
 - Check route details
 
 ```srl
-show network-instance default protocols bgp routes ipv4 prefix 172.16.10.0/2
-4 detail
+show network-instance default protocols bgp routes ipv4 prefix 172.16.10.0/24 detail
 ```
 
 If expected routes are not being advertised or received or if they do not have the intended route attributes (like community, local-pref), check route policy configuration.
