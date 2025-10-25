@@ -12,6 +12,8 @@ topology:
   kinds:
     nokia_srlinux:
       image: ghcr.io/nokia/srlinux:25.7.1
+      binds:
+        - cli:/home/admin/cli
     linux:
       image: osrg/gobgp
       binds:
