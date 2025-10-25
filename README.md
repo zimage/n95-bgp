@@ -782,6 +782,22 @@ PING 2.2.2.2 (2.2.2.2) 56(84) bytes of data.
 rtt min/avg/max/mdev = 2.962/3.468/3.791/0.362 ms
 ```
 
+### Custom CLI plugins
+
+Try the following NX-OS commands on any of the 4 switches. This is made by possible by the CLI customization feature in SR Linux. For more of these custom CLI plugins, check out the [MultiCLI](https://github.com/srl-labs/MultiCLI/tree/main) project.
+
+```srl
+show ip route
+```
+
+```srl
+show ip interface brief
+```
+
+```srl
+show ip bgp summary
+```
+
 ## 4 Enabling ECMP
 
 At this stage, `leaf1` is receiving `leaf2`'s system IP from both spines. But it is only installing the route from one spine. The other route is discarded and not installed in the forwarding table.
