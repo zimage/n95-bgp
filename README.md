@@ -304,6 +304,7 @@ set / network-instance default protocols bgp group servers send-default-route ip
 ```
 
 Verify that BGP peering sessions are 'established' between leafs and clients.
+Note that it will take around 1-2 minutes for the peering sessions to show up due to the gobgp implementation on the client side.
 
 ```srl
 show network-instance default protocols bgp neighbor
