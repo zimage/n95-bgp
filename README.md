@@ -10,13 +10,13 @@ Shortcut links to major sections in this README:
 
 |   |   |
 |---|---|
-| [Lab Topology](#lab-topology) | [Deploying the lab](#deploying-the-lab) |
+| [Lab Topology](#lab-topology) | [Deploying the lab](#0-deploying-the-lab) |
 | [IPv4 Addressing](#ipv4-link-addressing) | [CLI Quick Reference](#sr-linux-configuration-mode) |
-| [BGP Peering](#configure-bgp-peering) | [Enabling BFD](#enabling-bfd-on-leaf-spine-links) |
-| [Route Policies](#configuring-route-policies) | [ECMP](#enabling-ecmp) |
-| [AS Path](#bgp-attribute---as-path) | [IP Fabric](#ip-fabric-with-no-overlay) |
-| [Community](#bgp-attribute---community) | [Local Preference](#bgp-attribute---local-preference) |
-| [EVPN Overlay](#evpn-overlay) | [Debugging](#bgp-debugging)
+| [BGP Peering](#1-configure-bgp-peering) | [Enabling BFD](#2-enabling-bfd-on-leaf-spine-links) |
+| [Route Policies](#3-configuring-route-policies) | [ECMP](#4-enabling-ecmp) |
+| [AS Path](#5-bgp-attribute---as-path) | [IP Fabric](#6-ip-fabric-with-no-overlay) |
+| [Community](#7-bgp-attribute---community) | [Local Preference](#8-bgp-attribute---local-preference) |
+| [EVPN Overlay](#9-configure-bgp-for-overlay) | [Debugging](#10-bgp-debugging)
 
 ## Lab Environment
 
