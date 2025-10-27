@@ -782,7 +782,7 @@ rtt min/avg/max/mdev = 2.962/3.468/3.791/0.362 ms
 
 ### Custom CLI plugins
 
-Try the following NX-OS commands on any of the 4 switches. This is made by possible by the CLI customization feature in SR Linux. For more of these custom CLI plugins, check out the [MultiCLI](https://github.com/srl-labs/MultiCLI/tree/main) project.
+Try the following IOS commands on any of the 4 switches. This is made by possible by the CLI customization feature in SR Linux. For more of these custom CLI plugins, check out the [MultiCLI](https://github.com/srl-labs/MultiCLI/tree/main) project.
 
 ```srl
 show ip route
@@ -1512,6 +1512,7 @@ set / network-instance default protocols bgp afi-safi ipv4-unicast import-policy
 ```
 
 Verify on leaf1 that routes advertised from spine1 are not installed.
+
 Note - replace the neighbor address with the correct address for your environment.
 
 ```srl
@@ -1548,7 +1549,7 @@ Origin codes: i=IGP, e=EGP, ?=incomplete
 --------------------------------------------------------------------------------------------------------------------
 ```
 
-We see that both routes received from spine1 are not `Best Used` and we also see the local preference value of 10 assigned to these routes.
+We see that both routes received from spine1 are not `Best Used` and we also see the local preference value of 0 assigned to these routes.
 
 Delete import policy from leaf1 before proceeding to the next step to return to status quo with ECMP.
 
