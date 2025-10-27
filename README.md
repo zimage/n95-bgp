@@ -1558,7 +1558,7 @@ On leaf1:
 delete /network-instance default protocols bgp afi-safi ipv4-unicast import-policy
 ```
 
-## 9 EVPN Overlay
+## 9 Configure BGP for Overlay
 
 So far we have only been advertising IPv4 address family in BGP.
 
