@@ -281,8 +281,6 @@ set / network-instance default protocols bgp router-id 1.1.1.1
 set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
 set / network-instance default protocols bgp dynamic-neighbors accept match 172.16.10.0/24 peer-group servers
 set / network-instance default protocols bgp dynamic-neighbors accept match 172.16.10.0/24 allowed-peer-as [ 64500 ]
-set / network-instance default protocols bgp dynamic-neighbors accept match 10.80.1.0/24 peer-group servers
-set / network-instance default protocols bgp dynamic-neighbors accept match 10.80.1.0/24 allowed-peer-as [ 64500 ]
 set / network-instance default protocols bgp group servers peer-as 64500
 set / network-instance default protocols bgp group servers send-default-route ipv4-unicast true
 ```
@@ -295,8 +293,6 @@ Dynamic BGP peering configuration on **Leaf2** for clients:
 set / network-instance default protocols bgp autonomous-system 64600
 set / network-instance default protocols bgp router-id 2.2.2.2
 set / network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
-set / network-instance default protocols bgp dynamic-neighbors accept match 10.90.1.0/24 peer-group servers
-set / network-instance default protocols bgp dynamic-neighbors accept match 10.90.1.0/24 allowed-peer-as [ 64600 ]
 set / network-instance default protocols bgp dynamic-neighbors accept match 172.17.10.0/24 peer-group servers
 set / network-instance default protocols bgp dynamic-neighbors accept match 172.17.10.0/24 allowed-peer-as [ 64600 ]
 set / network-instance default protocols bgp group servers peer-as 64600
