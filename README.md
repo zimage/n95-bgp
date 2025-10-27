@@ -60,7 +60,7 @@ All leafs and Spines will be running the latest Nokia [SR Linux](https://www.nok
 
 All 4 clients will be running [goBGP](https://github.com/osrg/gobgp)
 
-## Deploying the lab
+## 0 Deploying the lab
 
 Install Containerlab on your VM.
 
