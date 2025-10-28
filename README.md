@@ -73,7 +73,7 @@ Logout and login for the sudo privileges to take effect.
 Use the below command to clone this repo to your VM.
 
 ```bash
-sudo git clone https://github.com/srlinuxamericas/n95-bgp.git
+sudo git clone https://github.com/zimage/n95-bgp.git
 ```
 
 Verify that the git repo files are available on your VM.
